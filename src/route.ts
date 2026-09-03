@@ -254,6 +254,7 @@ function toPlan(
   destination: Place,
   routed: Routed,
   stepLengthM: number,
+  targetSteps = TARGET_STEPS,
 ): WalkPlan {
   return {
     kind,
@@ -262,7 +263,7 @@ function toPlan(
     distanceM: routed.distanceM,
     durationS: Math.round(routed.distanceM / 1.34),
     steps: stepsFromMeters(routed.distanceM, stepLengthM),
-    targetSteps: TARGET_STEPS,
+    targetSteps,
     turnByTurn: routed.turnByTurn,
     path: routed.path,
     viaPoints: routed.viaPoints,
@@ -271,6 +272,7 @@ function toPlan(
 
 export type PlanOptions = {
   seed?: number
+  targetSteps?: number
 }
 
 async function tryWalk(
@@ -306,8 +308,9 @@ async function planLoop(
   origin: Place,
   stepLengthM: number,
   seed: number,
+  targetSteps = TARGET_STEPS,
 ): Promise<WalkPlan> {
-  const targetM = TARGET_STEPS * stepLengthM
+  const targetM = targetSteps * stepLengthM
   const headings = [28 + seed * 53, 118 + seed * 53, 208 + seed * 53]
   let radius = targetM / 5.35
   let best: Routed | null = null
@@ -319,8 +322,8 @@ async function planLoop(
     const routed = await tryWalk(origin, origin, waypoints, targetM)
     best = keepBest(best, routed, targetM)
     if (routed && closeEnough(routed.distanceM, targetM)) {
-      return toPlan('loop', origin, origin, routed, stepLengthM)
-    }
+    return toPlan('loop', origin, origin, routed, stepLengthM, targetSteps)
+      }
     if (routed) {
       radius = Math.min(2600, Math.max(700, radius * (targetM / routed.distanceM)))
       const refined = [0, 120, 240].map((deg) =>
@@ -329,7 +332,7 @@ async function planLoop(
       const again = await tryWalk(origin, origin, refined, targetM)
       best = keepBest(best, again, targetM)
       if (again && closeEnough(again.distanceM, targetM)) {
-        return toPlan('loop', origin, origin, again, stepLengthM)
+        return toPlan('loop', origin, origin, again, stepLengthM, targetSteps)
       }
     }
   }
@@ -340,7 +343,7 @@ async function planLoop(
     )
   }
 
-  return toPlan('loop', origin, origin, best, stepLengthM)
+  return toPlan('loop', origin, origin, best, stepLengthM, targetSteps)
 }
 
 async function planDetour(
@@ -349,8 +352,9 @@ async function planDetour(
   direct: Routed,
   stepLengthM: number,
   seed: number,
+  targetSteps = TARGET_STEPS,
 ): Promise<WalkPlan> {
-  const targetM = TARGET_STEPS * stepLengthM
+  const targetM = targetSteps * stepLengthM
   const mid = pathMidpoint(direct.path.length ? direct.path : [origin, destination])
   const heading = bearingDeg(origin, destination) + (seed % 2 === 0 ? 0 : 12)
   const spread = Math.sqrt(
@@ -365,7 +369,7 @@ async function planDetour(
       const routed = await tryWalk(origin, destination, [waypoint], targetM)
       best = keepBest(best, routed, targetM) ?? best
       if (routed && closeEnough(routed.distanceM, targetM)) {
-        return toPlan('detour', origin, destination, routed, stepLengthM)
+        return toPlan('detour', origin, destination, routed, stepLengthM, targetSteps)
       }
     }
   }
@@ -385,7 +389,7 @@ async function planDetour(
         ? 'long'
         : 'direct'
 
-  return toPlan(kind, origin, destination, best, stepLengthM)
+  return toPlan(kind, origin, destination, best, stepLengthM, targetSteps)
 }
 
 export async function planTenKWalk(
@@ -394,22 +398,23 @@ export async function planTenKWalk(
   stepLengthM: number,
   options: PlanOptions = {},
 ): Promise<WalkPlan> {
-  const targetM = TARGET_STEPS * stepLengthM
+  const targetSteps = options.targetSteps ?? TARGET_STEPS
+  const targetM = targetSteps * stepLengthM
   const seed = options.seed ?? 0
   const samePlace = haversineM(origin, destination) < 120
 
   if (samePlace) {
-    return planLoop(origin, stepLengthM, seed)
+    return planLoop(origin, stepLengthM, seed, targetSteps)
   }
 
   const direct = await requestWalk(origin, destination, [], true, targetM)
 
   if (direct.distanceM >= targetM * 0.965) {
     const kind: WalkKind = direct.distanceM > targetM * 1.04 ? 'long' : 'direct'
-    return toPlan(kind, origin, destination, direct, stepLengthM)
+    return toPlan(kind, origin, destination, direct, stepLengthM, targetSteps)
   }
 
-  return planDetour(origin, destination, direct, stepLengthM, seed)
+  return planDetour(origin, destination, direct, stepLengthM, seed, targetSteps)
 }
 
 export function googleMapsUrl(plan: WalkPlan): string {

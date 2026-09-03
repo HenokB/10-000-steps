@@ -774,6 +774,147 @@ input[type='range'] {
   color: var(--ink-soft);
 }
 
+/* Split walks */
+.chip-active {
+  border-color: var(--moss);
+  background: #e0f0ec;
+  color: var(--moss);
+}
+
+.split-segments {
+  display: grid;
+  gap: 20px;
+}
+
+.split-segment {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.split-segment-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.split-emoji {
+  font-size: 1.6rem;
+}
+
+.split-segment-header strong {
+  display: block;
+  font-family: Fraunces, ui-serif, Georgia, serif;
+  font-size: 1.15rem;
+}
+
+.split-steps {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+.split-dest-row {
+  display: flex;
+  gap: 8px;
+}
+
+.split-progress {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.split-progress-ring {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex: none;
+}
+
+.split-progress-ring svg {
+  width: 100%;
+  height: 100%;
+}
+
+.split-progress-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: Fraunces, ui-serif, Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.split-progress-label small {
+  font-family: Outfit, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.split-progress-text {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.split-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.split-tab {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 10px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: var(--white);
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s;
+}
+
+.split-tab strong {
+  font-size: 0.82rem;
+}
+
+.split-tab small {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.split-tab-active {
+  border-color: var(--moss);
+  background: #e0f0ec;
+}
+
+.split-tab-done {
+  opacity: 0.7;
+}
+
+.split-check {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.75rem;
+  color: var(--moss);
+}
+
 /* Completion overlay */
 .completion-overlay {
   position: fixed;

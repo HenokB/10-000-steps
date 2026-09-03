@@ -7,6 +7,7 @@ type DestinationScreenProps = {
   error: string | null
   onPick: (place: Place) => void
   onOther: () => void
+  onSplit: () => void
   onBack: () => void
   onSettings: () => void
 }
@@ -17,6 +18,7 @@ export function DestinationScreen({
   error,
   onPick,
   onOther,
+  onSplit,
   onBack,
   onSettings,
 }: DestinationScreenProps) {
@@ -69,6 +71,15 @@ export function DestinationScreen({
           <span>
             <strong>Somewhere else</strong>
             <em>A park, a cafe, a friend’s place…</em>
+          </span>
+        </button>
+        <button type="button" className="dest-card" onClick={onSplit}>
+          <span className="dest-icon" aria-hidden="true">
+            ⚡
+          </span>
+          <span>
+            <strong>Split my 10k</strong>
+            <em>2 or 3 walks across the day — morning, lunch, evening.</em>
           </span>
         </button>
       </div>

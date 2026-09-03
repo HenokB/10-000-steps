@@ -6,6 +6,8 @@ import { PlanningScreen } from './components/PlanningScreen'
 import { RouteScreen } from './components/RouteScreen'
 import { SettingsScreen } from './components/SettingsScreen'
 import { SetupScreen } from './components/SetupScreen'
+import { SplitRouteScreen } from './components/SplitRouteScreen'
+import { SplitSetupScreen, type SplitSegment } from './components/SplitSetupScreen'
 import { WelcomeScreen } from './components/WelcomeScreen'
 import { getCurrentPosition } from './geo'
 import { reverseGeocode } from './maps'
@@ -22,6 +24,9 @@ type Screen =
   | 'other'
   | 'planning'
   | 'route'
+  | 'split-setup'
+  | 'split-planning'
+  | 'split-route'
   | 'settings'
 
 export default function App() {
@@ -35,6 +40,8 @@ export default function App() {
   const [routeSeed, setRouteSeed] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [returnTo, setReturnTo] = useState<Screen>('locate')
+  const [splitSegments, setSplitSegments] = useState<SplitSegment[]>([])
+  const [splitPlans, setSplitPlans] = useState<WalkPlan[]>([])
   const gpsGeneration = useRef(0)
 
   useEffect(() => {
@@ -110,6 +117,36 @@ export default function App() {
     }
   }
 
+  async function planSplit(segments: SplitSegment[]) {
+    if (!origin || !profile) return
+    setSplitSegments(segments)
+    setError(null)
+    setScreen('split-planning')
+    try {
+      const plans: WalkPlan[] = []
+      let start = origin
+      for (const seg of segments) {
+        const next = await planTenKWalk(
+          start,
+          seg.destination,
+          profile.stepLengthM,
+          { targetSteps: seg.steps },
+        )
+        plans.push(next)
+        start = seg.destination
+      }
+      setSplitPlans(plans)
+      setScreen('split-route')
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Could not plan the split walks. Try different destinations.',
+      )
+      setScreen('split-setup')
+    }
+  }
+
   function resetAll() {
     clearAll()
     setProfileState(null)
@@ -117,6 +154,8 @@ export default function App() {
     setPlan(null)
     setDestination(null)
     setRouteSeed(0)
+    setSplitSegments([])
+    setSplitPlans([])
     setGpsTried(false)
     setScreen('welcome')
   }
@@ -176,6 +215,7 @@ export default function App() {
         error={error}
         onPick={(place) => void planTo(place)}
         onOther={() => setScreen('other')}
+        onSplit={() => setScreen('split-setup')}
         onBack={() => setScreen('locate')}
         onSettings={() => {
           setReturnTo('destination')
@@ -190,6 +230,38 @@ export default function App() {
       <OtherScreen
         onPick={(place) => void planTo(place)}
         onBack={() => setScreen('destination')}
+      />
+    )
+  }
+
+  if (screen === 'split-setup' && profile && origin) {
+    return (
+      <SplitSetupScreen
+        profile={profile}
+        error={error}
+        onPlan={(segments) => void planSplit(segments)}
+        onBack={() => setScreen('destination')}
+      />
+    )
+  }
+
+  if (screen === 'split-planning') {
+    return <PlanningScreen />
+  }
+
+  if (screen === 'split-route' && splitPlans.length && splitSegments.length) {
+    return (
+      <SplitRouteScreen
+        segments={splitSegments}
+        plans={splitPlans}
+        onBack={() => setScreen('split-setup')}
+        onNewWalk={() => {
+          setSplitPlans([])
+          setSplitSegments([])
+          setGpsTried(false)
+          setOrigin(null)
+          setScreen('locate')
+        }}
       />
     )
   }
