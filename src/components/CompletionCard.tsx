@@ -86,33 +86,44 @@ function drawCard(
   ctx.fillText('steps walked', W / 2, 490)
 
   // Route info card
+  const cardX = 80
+  const cardW = W - 160
+  const maxLabelW = cardW - 100 // padding on both sides
+
   ctx.fillStyle = 'rgba(255,255,255,0.1)'
-  roundRect(ctx, 80, 550, W - 160, 200, 28)
+  roundRect(ctx, cardX, 550, cardW, 240, 28)
   ctx.fill()
 
   ctx.textAlign = 'left'
-  ctx.font = '500 22px Outfit, sans-serif'
-  ctx.fillStyle = 'rgba(255,255,255,0.6)'
-  ctx.fillText('FROM', 130, 600)
-  ctx.font = '600 28px Outfit, sans-serif'
-  ctx.fillStyle = '#ffffff'
-  ctx.fillText(plan.origin.label, 130, 636)
 
-  ctx.font = '500 22px Outfit, sans-serif'
-  ctx.fillStyle = 'rgba(255,255,255,0.6)'
-  ctx.fillText('TO', 130, 690)
-  ctx.font = '600 28px Outfit, sans-serif'
+  // FROM
+  ctx.font = '500 20px Outfit, sans-serif'
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'
+  ctx.fillText('FROM', 130, 595)
+  ctx.font = '600 26px Outfit, sans-serif'
   ctx.fillStyle = '#ffffff'
-  ctx.fillText(plan.destination.label, 130, 726)
+  ctx.fillText(truncate(ctx, plan.origin.label, maxLabelW), 130, 628)
 
-  ctx.textAlign = 'right'
-  ctx.font = '600 28px Outfit, sans-serif'
+  // TO
+  ctx.font = '500 20px Outfit, sans-serif'
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'
+  ctx.fillText('TO', 130, 676)
+  ctx.font = '600 26px Outfit, sans-serif'
+  ctx.fillStyle = '#ffffff'
+  ctx.fillText(truncate(ctx, plan.destination.label, maxLabelW), 130, 709)
+
+  // Distance + duration row at bottom of card
+  ctx.font = '600 24px Outfit, sans-serif'
   ctx.fillStyle = '#e0a84b'
-  ctx.fillText(formatDistance(plan.distanceM).split(' · ')[0], W - 130, 636)
-  ctx.fillText(formatDuration(plan.durationS), W - 130, 726)
+  ctx.textAlign = 'center'
+  ctx.fillText(
+    `${formatDistance(plan.distanceM).split(' · ')[0]}  ·  ${formatDuration(plan.durationS)}`,
+    W / 2,
+    766,
+  )
 
   // Stats row
-  const statsY = 830
+  const statsY = 860
   const cols = [
     { label: '🔥 Streak', value: `${streak.current} day${streak.current !== 1 ? 's' : ''}` },
     { label: '🏅 Total walks', value: String(streak.total) },
@@ -134,12 +145,16 @@ function drawCard(
   ctx.textAlign = 'center'
   ctx.font = 'italic 24px Fraunces, Georgia, serif'
   ctx.fillStyle = 'rgba(255,255,255,0.65)'
-  wrapText(ctx, `"${pickRandom(FUN_FACTS, seed + 3)}"`, W / 2, 990, W - 200, 34)
+  wrapText(ctx, `"${pickRandom(FUN_FACTS, seed + 3)}"`, W / 2, 1020, W - 200, 34)
+}
 
-  // Footer branding
-  ctx.font = '600 26px Outfit, sans-serif'
-  ctx.fillStyle = 'rgba(255,255,255,0.45)'
-  ctx.fillText('10k steps · tenk.walk', W / 2, H - 80)
+function truncate(ctx: CanvasRenderingContext2D, text: string, maxW: number): string {
+  if (ctx.measureText(text).width <= maxW) return text
+  let t = text
+  while (t.length > 0 && ctx.measureText(t + '…').width > maxW) {
+    t = t.slice(0, -1)
+  }
+  return t + '…'
 }
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
