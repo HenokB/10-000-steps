@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { geocodeAddress, searchPlaces } from '../maps'
 import type { Place } from '../types'
 
@@ -22,12 +22,17 @@ export function AddressInput({
   const [error, setError] = useState('')
   const [suggestions, setSuggestions] = useState<Place[]>([])
   const [open, setOpen] = useState(false)
+  const pinned = useRef(false)
 
   useEffect(() => {
     setText(value?.address ?? '')
   }, [value?.address])
 
   useEffect(() => {
+    if (pinned.current) {
+      pinned.current = false
+      return
+    }
     const query = text.trim()
     if (value && query === value.address) {
       setSuggestions([])
@@ -52,6 +57,7 @@ export function AddressInput({
   }, [text, value])
 
   function choose(place: Place) {
+    pinned.current = true
     setText(place.address)
     setSuggestions([])
     setOpen(false)
