@@ -20,7 +20,7 @@ const CELEBRATIONS = [
 
 const FUN_FACTS = [
   'You just walked roughly the height of the Burj Khalifa — twice!',
-  'That's about 400 calories burned. Nice work!',
+  "That's about 400 calories burned. Nice work!",
   'Your walk covered roughly 80 city blocks.',
   'The average person sits 10 hours a day — not you!',
   'Walking 10k steps daily cuts heart disease risk by 40%.',
