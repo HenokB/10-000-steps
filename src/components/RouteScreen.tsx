@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { formatDistance, formatDuration, formatSteps } from '../format'
-import { kindCopy, openMapsUrl } from '../route'
+import { defaultMapsUrl, googleMapsUrl, kindCopy } from '../route'
 import { TARGET_STEPS, type WalkPlan, type WalkSide } from '../types'
 import { CompletionCard } from './CompletionCard'
 import { Insights } from './Insights'
@@ -99,7 +99,10 @@ export function RouteScreen({
           <button className="complete-btn" type="button" onClick={() => setShowCompletion(true)}>
             ✅ Complete walk
           </button>
-          <a className="primary" href={openMapsUrl(plan)} target="_blank" rel="noreferrer">
+          <a className="primary" href={defaultMapsUrl(plan)} target="_blank" rel="noreferrer">
+            🗺️ Open in Maps
+          </a>
+          <a className="ghost-btn wide" href={googleMapsUrl(plan)} target="_blank" rel="noreferrer" style={{ textAlign: 'center', textDecoration: 'none' }}>
             Open in Google Maps
           </a>
           <button className="ghost-btn wide" type="button" onClick={onTryAnother}>

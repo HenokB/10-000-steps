@@ -412,7 +412,7 @@ export async function planTenKWalk(
   return planDetour(origin, destination, direct, stepLengthM, seed)
 }
 
-export function openMapsUrl(plan: WalkPlan): string {
+export function googleMapsUrl(plan: WalkPlan): string {
   const params = new URLSearchParams({
     api: '1',
     origin: `${plan.origin.lat},${plan.origin.lng}`,
@@ -430,6 +430,20 @@ export function openMapsUrl(plan: WalkPlan): string {
     )
   }
   return `https://www.google.com/maps/dir/?${params.toString()}`
+}
+
+export function appleMapsUrl(plan: WalkPlan): string {
+  const params = new URLSearchParams({
+    saddr: `${plan.origin.lat},${plan.origin.lng}`,
+    daddr: `${plan.destination.lat},${plan.destination.lng}`,
+    dirflg: 'w',
+  })
+  return `https://maps.apple.com/?${params.toString()}`
+}
+
+export function defaultMapsUrl(plan: WalkPlan): string {
+  const isApple = /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent)
+  return isApple ? appleMapsUrl(plan) : googleMapsUrl(plan)
 }
 
 export function kindCopy(kind: WalkKind, destinationLabel: string): string {
