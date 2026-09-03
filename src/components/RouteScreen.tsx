@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { formatDistance, formatDuration, formatSteps } from '../format'
 import { kindCopy, openMapsUrl } from '../route'
 import { TARGET_STEPS, type WalkPlan, type WalkSide } from '../types'
+import { CompletionCard } from './CompletionCard'
 import { Insights } from './Insights'
 import { Logo } from './Logo'
 import { WalkArt } from './WalkArt'
@@ -57,6 +59,7 @@ export function RouteScreen({
   onChangeDestination,
   onTryAnother,
 }: RouteScreenProps) {
+  const [showCompletion, setShowCompletion] = useState(false)
   const overUnder = plan.steps - plan.targetSteps
   const delta =
     overUnder === 0
@@ -93,6 +96,9 @@ export function RouteScreen({
         <p className="lede tight">{kindCopy(plan.kind, plan.destination.label)}</p>
         {error ? <p className="banner error">{error}</p> : null}
         <div className="route-actions">
+          <button className="complete-btn" type="button" onClick={() => setShowCompletion(true)}>
+            ✅ Complete walk
+          </button>
           <a className="primary" href={openMapsUrl(plan)} target="_blank" rel="noreferrer">
             Open in Google Maps
           </a>
@@ -126,6 +132,9 @@ export function RouteScreen({
         </section>
       </aside>
       <WalkMap plan={plan} />
+      {showCompletion && (
+        <CompletionCard plan={plan} onClose={() => setShowCompletion(false)} />
+      )}
     </div>
   )
 }

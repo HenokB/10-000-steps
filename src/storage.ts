@@ -35,3 +35,51 @@ export function setProfile(profile: Profile) {
 export function clearAll() {
   localStorage.removeItem(KEY)
 }
+
+const STREAK_KEY = 'tenk-streak-v1'
+
+type StreakData = {
+  dates: string[]
+  total: number
+}
+
+function readStreak(): StreakData {
+  try {
+    const raw = localStorage.getItem(STREAK_KEY)
+    return raw ? (JSON.parse(raw) as StreakData) : { dates: [], total: 0 }
+  } catch {
+    return { dates: [], total: 0 }
+  }
+}
+
+function todayStr(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+export function recordWalk(): StreakData {
+  const data = readStreak()
+  const today = todayStr()
+  if (!data.dates.includes(today)) {
+    data.dates.push(today)
+  }
+  data.total += 1
+  localStorage.setItem(STREAK_KEY, JSON.stringify(data))
+  return data
+}
+
+export function getStreak(): { current: number; total: number } {
+  const data = readStreak()
+  const sorted = [...data.dates].sort().reverse()
+  let streak = 0
+  const now = new Date()
+  for (let i = 0; i < sorted.length; i++) {
+    const expected = new Date(now)
+    expected.setDate(expected.getDate() - i)
+    if (sorted[i] === expected.toISOString().slice(0, 10)) {
+      streak++
+    } else {
+      break
+    }
+  }
+  return { current: streak, total: data.total }
+}
